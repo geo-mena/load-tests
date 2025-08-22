@@ -1,4 +1,5 @@
-{
-  "tokenImage": "BASE64_ENCODED_IMAGE_HERE",
-  "extraData": "sample-test-request-001"
-}
+[
+  {
+    "tokenImage": "AQUÍ_COLOCA_TU_TOKEN_BASE64_REAL"
+  }
+]

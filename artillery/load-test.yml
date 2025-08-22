@@ -1,0 +1,61 @@
+config:
+  target: 'http://localhost:8080'
+  payload:
+    path: '../data/payload.json'
+    fields:
+      - 'tokenImage'
+  phases:
+    - duration: 30   # Ramp up 30s
+      arrivalRate: 0
+      arrivalCount: 0
+    - duration: 30   # Increase to target TPS
+      arrivalRate: 5  # 5 TPS
+    - duration: 300  # Maintain 5 minutes
+      arrivalRate: 5  # 5 TPS  
+    - duration: 30   # Ramp down
+      arrivalRate: 0
+
+scenarios:
+  - name: "Passive Liveness Load Test"
+    requests:
+      - post:
+          url: "/api/v1/selphid/passive-liveness/evaluate/token"
+          headers:
+            Content-Type: "application/json"
+            Accept: "application/json"
+          json:
+            tokenImage: "{{ tokenImage }}"
+            extraData: "artillery-load-test-request"
+          capture:
+            - json: "$.status"
+              as: "responseStatus"
+            - json: "$.message" 
+              as: "responseMessage"
+          expect:
+            - statusCode: 200
+            - contentType: "application/json"
+            - hasProperty: "status"
+
+# Environment variables override
+environments:
+  local:
+    target: 'http://localhost:8080'
+    phases:
+      - duration: 30
+        arrivalRate: 4  # 4 TPS for local testing
+      - duration: 240
+        arrivalRate: 4
+      - duration: 30
+        arrivalRate: 0
+        
+  stress:
+    target: 'http://localhost:8080'
+    phases:
+      - duration: 30
+        arrivalRate: 0
+      - duration: 30
+        arrivalRate: 6  # 6 TPS for stress testing
+      - duration: 300
+        arrivalRate: 6
+      - duration: 30
+        arrivalRate: 0
