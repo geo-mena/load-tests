@@ -1,53 +1,137 @@
 #!/bin/bash
 
-# Netdata Setup Script for Load Testing
-# This script installs and configures Netdata for optimal load testing monitoring
+# Netdata Setup Script for Load Testing - Linux Only
+# This script installs and configures Netdata for optimal load testing monitoring on Linux systems
 
 set -e
 
-echo "🔧 Setting up Netdata for Load Testing Monitoring"
-echo "=================================================="
+# Check if running on Linux
+if [[ "$OSTYPE" != "linux-gnu"* ]]; then
+    echo "❌ This script is designed for Linux only."
+    echo "   Current OS: $OSTYPE"
+    echo "   For other operating systems, please install Netdata manually."
+    exit 1
+fi
 
-# Check if running as root for system installation
-check_permissions() {
+echo "🔧 Setting up Netdata for Load Testing Monitoring (Linux)"
+echo "========================================================="
+
+# Check Linux distribution and prerequisites
+check_system() {
+    echo "ℹ️  Checking Linux system..."
+    
+    # Detect Linux distribution
+    if [[ -f /etc/os-release ]]; then
+        . /etc/os-release
+        DISTRO=$ID
+        VERSION=$VERSION_ID
+        echo "   Distribution: $PRETTY_NAME"
+    else
+        echo "⚠️  Cannot detect Linux distribution"
+        DISTRO="unknown"
+    fi
+    
+    # Check if running as root
     if [[ $EUID -eq 0 ]]; then
         echo "ℹ️  Running as root - will install system-wide"
         INSTALL_TYPE="system"
     else
-        echo "ℹ️  Running as user - will install in home directory"
+        echo "ℹ️  Running as user - may need sudo for installation"
         INSTALL_TYPE="user"
+    fi
+    
+    # Check required tools
+    local missing_tools=()
+    for tool in curl wget; do
+        if ! command -v $tool &> /dev/null; then
+            missing_tools+=("$tool")
+        fi
+    done
+    
+    if [[ ${#missing_tools[@]} -gt 0 ]]; then
+        echo "❌ Missing required tools: ${missing_tools[*]}"
+        echo "   Please install them first:"
+        case $DISTRO in
+            ubuntu|debian)
+                echo "   sudo apt-get update && sudo apt-get install -y ${missing_tools[*]}"
+                ;;
+            centos|rhel|fedora)
+                echo "   sudo yum install -y ${missing_tools[*]}"  # or dnf for newer versions
+                ;;
+            *)
+                echo "   Install using your distribution's package manager"
+                ;;
+        esac
+        exit 1
     fi
 }
 
-# Install Netdata
+# Install Netdata on Linux
 install_netdata() {
     echo ""
-    echo "📦 Installing Netdata..."
+    echo "📦 Installing Netdata on Linux..."
     
     if command -v netdata &> /dev/null; then
         echo "✅ Netdata is already installed"
+        NETDATA_VERSION=$(netdata -V 2>&1 | head -n1 || echo "unknown")
+        echo "   Version: $NETDATA_VERSION"
         return 0
     fi
     
-    # Detect OS and install accordingly
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS installation
-        if command -v brew &> /dev/null; then
-            echo "🍺 Installing via Homebrew..."
-            brew install netdata
-        else
-            echo "❌ Homebrew not found. Please install Homebrew first:"
-            echo "   /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-            exit 1
-        fi
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Linux installation
-        echo "🐧 Installing via Netdata installer..."
-        bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --disable-telemetry
-    else
-        echo "❌ Unsupported operating system: $OSTYPE"
+    # Try package manager first for better integration
+    case $DISTRO in
+        ubuntu|debian)
+            echo "🐧 Attempting installation via apt..."
+            if install_via_apt; then
+                return 0
+            else
+                echo "⚠️  Package manager installation failed, trying official installer..."
+            fi
+            ;;
+        centos|rhel|fedora)
+            echo "🐧 Attempting installation via yum/dnf..."
+            if install_via_yum; then
+                return 0
+            else
+                echo "⚠️  Package manager installation failed, trying official installer..."
+            fi
+            ;;
+        *)
+            echo "🐧 Unknown distribution, using official installer..."
+            ;;
+    esac
+    
+    # Fallback to official Netdata installer
+    echo "🌐 Installing via official Netdata installer..."
+    if ! bash <(curl -Ss https://my-netdata.io/kickstart.sh) --dont-wait --disable-telemetry --claim-token "" --claim-rooms "" --claim-url "https://app.netdata.cloud"; then
+        echo "❌ Netdata installation failed"
         exit 1
     fi
+    
+    echo "✅ Netdata installed successfully"
+}
+
+# Install via apt (Ubuntu/Debian)
+install_via_apt() {
+    if sudo apt-get update && sudo apt-get install -y netdata; then
+        return 0
+    fi
+    return 1
+}
+
+# Install via yum/dnf (CentOS/RHEL/Fedora)
+install_via_yum() {
+    # Try dnf first (newer systems), then yum
+    if command -v dnf &> /dev/null; then
+        if sudo dnf install -y netdata; then
+            return 0
+        fi
+    elif command -v yum &> /dev/null; then
+        if sudo yum install -y netdata; then
+            return 0
+        fi
+    fi
+    return 1
 }
 
 # Configure Netdata for load testing
@@ -55,13 +139,15 @@ configure_netdata() {
     echo ""
     echo "⚙️  Configuring Netdata for load testing..."
     
-    # Find Netdata config directory
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        NETDATA_CONFIG_DIR="/usr/local/etc/netdata"
-        NETDATA_LIB_DIR="/usr/local/var/lib/netdata"
-    else
-        NETDATA_CONFIG_DIR="/etc/netdata"
-        NETDATA_LIB_DIR="/var/lib/netdata"
+    # Standard Linux paths
+    NETDATA_CONFIG_DIR="/etc/netdata"
+    NETDATA_LIB_DIR="/var/lib/netdata"
+    NETDATA_LOG_DIR="/var/log/netdata"
+    
+    # Create config directory if it doesn't exist
+    if [[ ! -d "$NETDATA_CONFIG_DIR" ]]; then
+        echo "📁 Creating Netdata config directory..."
+        sudo mkdir -p "$NETDATA_CONFIG_DIR"
     fi
     
     # Backup original config if it exists
@@ -72,11 +158,27 @@ configure_netdata() {
     
     # Copy our optimized configuration
     echo "📋 Installing optimized configuration..."
-    sudo cp ../monitoring/netdata.conf "$NETDATA_CONFIG_DIR/netdata.conf"
+    if [[ ! -f "../monitoring/netdata.conf" ]]; then
+        echo "❌ Configuration file not found: ../monitoring/netdata.conf"
+        exit 1
+    fi
+    
+    sudo cp "../monitoring/netdata.conf" "$NETDATA_CONFIG_DIR/netdata.conf"
     
     # Set proper permissions
-    sudo chown netdata:netdata "$NETDATA_CONFIG_DIR/netdata.conf" 2>/dev/null || true
+    sudo chown netdata:netdata "$NETDATA_CONFIG_DIR/netdata.conf" 2>/dev/null || {
+        echo "⚠️  Warning: Could not set netdata user ownership (user may not exist yet)"
+        sudo chown root:root "$NETDATA_CONFIG_DIR/netdata.conf"
+    }
     sudo chmod 644 "$NETDATA_CONFIG_DIR/netdata.conf"
+    
+    # Ensure log directory exists and has proper permissions
+    if [[ ! -d "$NETDATA_LOG_DIR" ]]; then
+        sudo mkdir -p "$NETDATA_LOG_DIR"
+        sudo chown netdata:netdata "$NETDATA_LOG_DIR" 2>/dev/null || sudo chown root:root "$NETDATA_LOG_DIR"
+    fi
+    
+    echo "✅ Netdata configuration installed"
 }
 
 # Create Netdata dashboards for load testing
@@ -169,42 +271,85 @@ EOF
     echo "✅ Dashboard created: $DASHBOARD_DIR/load-test-overview.html"
 }
 
-# Start/restart Netdata service
+# Start/restart Netdata service on Linux
 start_netdata() {
     echo ""
-    echo "🚀 Starting Netdata service..."
+    echo "🚀 Managing Netdata service..."
     
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # macOS - using brew services
-        if brew services list | grep -q "netdata.*started"; then
-            echo "🔄 Restarting Netdata service..."
-            brew services restart netdata
+    # Check if systemd is available
+    if command -v systemctl &> /dev/null; then
+        # Modern Linux with systemd
+        echo "🔧 Using systemctl to manage Netdata service..."
+        
+        # Enable the service to start on boot
+        if sudo systemctl enable netdata 2>/dev/null; then
+            echo "✅ Netdata service enabled for startup"
         else
-            echo "▶️  Starting Netdata service..."
-            brew services start netdata
+            echo "⚠️  Could not enable Netdata service (may already be enabled)"
         fi
-    else
-        # Linux - using systemctl
+        
+        # Start or restart the service
         if systemctl is-active --quiet netdata; then
             echo "🔄 Restarting Netdata service..."
             sudo systemctl restart netdata
         else
             echo "▶️  Starting Netdata service..."
             sudo systemctl start netdata
-            sudo systemctl enable netdata
+        fi
+        
+        # Check service status
+        if systemctl is-active --quiet netdata; then
+            echo "✅ Netdata service is active"
+        else
+            echo "❌ Netdata service failed to start"
+            echo "   Checking service status..."
+            sudo systemctl status netdata --no-pager -l
+            exit 1
+        fi
+        
+    elif command -v service &> /dev/null; then
+        # Older Linux with service command
+        echo "🔧 Using service command to manage Netdata..."
+        sudo service netdata restart
+        
+    else
+        # Try direct binary execution
+        echo "🔧 Attempting to start Netdata directly..."
+        if command -v netdata &> /dev/null; then
+            sudo netdata -D
+        else
+            echo "❌ Cannot find method to start Netdata service"
+            exit 1
         fi
     fi
     
-    # Wait for service to start
+    # Wait for service to start and verify
     echo "⏳ Waiting for Netdata to start..."
-    for i in {1..30}; do
+    for i in {1..45}; do
         if curl -s http://localhost:19999/api/v1/info > /dev/null 2>&1; then
-            echo "✅ Netdata is running!"
+            echo "✅ Netdata is running and accessible!"
+            
+            # Get some basic info
+            NETDATA_VERSION=$(curl -s http://localhost:19999/api/v1/info 2>/dev/null | grep -o '"version":"[^"]*"' | cut -d'"' -f4 || echo "unknown")
+            echo "   Version: $NETDATA_VERSION"
+            echo "   Dashboard: http://localhost:19999"
             break
         fi
+        
+        if [[ $((i % 10)) -eq 0 ]]; then
+            echo "   Still waiting... ($i/45)"
+        fi
+        
         sleep 1
-        if [[ $i -eq 30 ]]; then
+        
+        if [[ $i -eq 45 ]]; then
             echo "❌ Timeout waiting for Netdata to start"
+            echo "   Checking if service is running..."
+            if command -v systemctl &> /dev/null; then
+                sudo systemctl status netdata --no-pager
+            fi
+            echo "   Checking if port 19999 is in use..."
+            sudo netstat -tlnp | grep :19999 || echo "   Port 19999 is not in use"
             exit 1
         fi
     done
@@ -212,7 +357,7 @@ start_netdata() {
 
 # Main execution
 main() {
-    check_permissions
+    check_system
     install_netdata
     configure_netdata
     create_dashboards
