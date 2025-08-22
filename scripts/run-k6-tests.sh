@@ -42,15 +42,33 @@ if ! curl -s -f "http://${HOST}:${PORT}/api/v1/selphid/health" > /dev/null; then
     fi
 fi
 
-# Load payload data
+# Prepare payload file for K6
+PAYLOAD_FILE_ABSOLUTE=$(realpath "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || echo "$DEFAULT_PAYLOAD_FILE")
+
 if [[ -f "$DEFAULT_PAYLOAD_FILE" ]]; then
-    TOKEN_IMAGE=$(jq -r '.tokenImage' "$DEFAULT_PAYLOAD_FILE")
-    EXTRA_DATA=$(jq -r '.extraData' "$DEFAULT_PAYLOAD_FILE")
-    echo "📄 Loaded payload from $DEFAULT_PAYLOAD_FILE"
+    # Validate JSON structure
+    if jq . "$DEFAULT_PAYLOAD_FILE" > /dev/null 2>&1; then
+        EXTRA_DATA=$(jq -r '.extraData' "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || echo "k6-load-test")
+        echo "📄 Loaded payload from $DEFAULT_PAYLOAD_FILE"
+        echo "   Payload size: $(stat -c%s "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || stat -f%z "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || echo "unknown") bytes"
+    else
+        echo "❌ Invalid JSON in payload file: $DEFAULT_PAYLOAD_FILE"
+        exit 1
+    fi
 else
     echo "⚠️  Payload file not found: $DEFAULT_PAYLOAD_FILE"
-    TOKEN_IMAGE="BASE64_ENCODED_IMAGE_HERE"
+    echo "   Creating default payload file..."
+    
+    # Create default payload
+    mkdir -p "$(dirname "$DEFAULT_PAYLOAD_FILE")"
+    cat > "$DEFAULT_PAYLOAD_FILE" << EOF
+{
+  "tokenImage": "BASE64_ENCODED_IMAGE_HERE",
+  "extraData": "k6-load-test-default"
+}
+EOF
     EXTRA_DATA="k6-load-test-default"
+    echo "   Created: $DEFAULT_PAYLOAD_FILE"
 fi
 
 # Display test configuration
@@ -70,7 +88,7 @@ k6 run \
     --env SERVER_PORT="$PORT" \
     --env TPS="$TPS" \
     --env DURATION="$DURATION" \
-    --env TOKEN_IMAGE="$TOKEN_IMAGE" \
+    --env PAYLOAD_FILE="$PAYLOAD_FILE_ABSOLUTE" \
     --env EXTRA_DATA="$EXTRA_DATA" \
     ../k6/passive-liveness-load-test.js
 

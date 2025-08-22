@@ -91,15 +91,31 @@ prepare_environment() {
     # Create results directory
     mkdir -p ../results
     
-    # Load test payload
+    # Prepare payload file
+    PAYLOAD_FILE_ABSOLUTE=$(realpath "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || echo "$DEFAULT_PAYLOAD_FILE")
+    
     if [[ -f "$DEFAULT_PAYLOAD_FILE" ]]; then
-        TOKEN_IMAGE=$(jq -r '.tokenImage' "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || echo "BASE64_ENCODED_IMAGE_HERE")
-        EXTRA_DATA=$(jq -r '.extraData' "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || echo "k6-integrated-test")
-        log_success "Loaded payload from $DEFAULT_PAYLOAD_FILE"
+        if jq . "$DEFAULT_PAYLOAD_FILE" > /dev/null 2>&1; then
+            EXTRA_DATA=$(jq -r '.extraData' "$DEFAULT_PAYLOAD_FILE" 2>/dev/null || echo "k6-integrated-test")
+            log_success "Loaded payload from $DEFAULT_PAYLOAD_FILE"
+        else
+            log_error "Invalid JSON in payload file: $DEFAULT_PAYLOAD_FILE"
+            exit 1
+        fi
     else
         log_warning "Payload file not found: $DEFAULT_PAYLOAD_FILE"
-        TOKEN_IMAGE="BASE64_ENCODED_IMAGE_HERE"
+        log_info "Creating default payload file..."
+        
+        mkdir -p "$(dirname "$DEFAULT_PAYLOAD_FILE")"
+        cat > "$DEFAULT_PAYLOAD_FILE" << EOF
+{
+  "tokenImage": "BASE64_ENCODED_IMAGE_HERE",
+  "extraData": "k6-integrated-test-default"
+}
+EOF
         EXTRA_DATA="k6-integrated-test-default"
+        PAYLOAD_FILE_ABSOLUTE=$(realpath "$DEFAULT_PAYLOAD_FILE")
+        log_success "Created default payload file"
     fi
     
     # Generate test session ID
@@ -168,7 +184,7 @@ run_load_test() {
         --env SERVER_PORT="$PORT" \
         --env TPS="$TPS" \
         --env DURATION="$DURATION" \
-        --env TOKEN_IMAGE="$TOKEN_IMAGE" \
+        --env PAYLOAD_FILE="$PAYLOAD_FILE_ABSOLUTE" \
         --env EXTRA_DATA="$EXTRA_DATA" \
         --out json="../results/${TEST_SESSION_ID}_k6_metrics.json" \
         ../k6/passive-liveness-load-test.js

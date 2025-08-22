@@ -1,6 +1,7 @@
 import http from 'k6/http';
 import { check, sleep } from 'k6';
 import { Rate } from 'k6/metrics';
+import { open } from 'k6';
 
 // Custom metrics
 export let errorRate = new Rate('errors');
@@ -15,11 +16,30 @@ const DEFAULT_CONFIG = {
   RAMP_DOWN: __ENV.RAMP_DOWN || '30s'
 };
 
-// Load test payload
-const payload = JSON.stringify({
-  tokenImage: __ENV.TOKEN_IMAGE || "BASE64_ENCODED_IMAGE_HERE",
-  extraData: __ENV.EXTRA_DATA || "k6-load-test-request"
-});
+// Load test payload from file or environment
+let payload;
+if (__ENV.PAYLOAD_FILE) {
+  // Load payload from file (recommended for large Base64 images)
+  try {
+    const payloadData = JSON.parse(open(__ENV.PAYLOAD_FILE));
+    payload = JSON.stringify({
+      tokenImage: payloadData.tokenImage || "BASE64_ENCODED_IMAGE_HERE",
+      extraData: payloadData.extraData || "k6-load-test-request"
+    });
+  } catch (e) {
+    console.error('Error loading payload file:', __ENV.PAYLOAD_FILE, e.message);
+    payload = JSON.stringify({
+      tokenImage: "BASE64_ENCODED_IMAGE_HERE",
+      extraData: "k6-load-test-request-error"
+    });
+  }
+} else {
+  // Fallback to environment variables (may fail with large payloads)
+  payload = JSON.stringify({
+    tokenImage: __ENV.TOKEN_IMAGE || "BASE64_ENCODED_IMAGE_HERE",
+    extraData: __ENV.EXTRA_DATA || "k6-load-test-request"
+  });
+}
 
 // Test options configuration
 export let options = {
