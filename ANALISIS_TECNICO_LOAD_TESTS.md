@@ -41,7 +41,7 @@ Cada test siguió el patrón:
 
 ### Timeline Visual de Ejecución
 
-![Load Test Timeline](data/gant.svg)
+![Load Test Timeline](data/gant.png)
 
 ## Análisis de Métricas del Sistema
 

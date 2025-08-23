@@ -1,0 +1,210 @@
+body {
+  font-family: 'Helvetica Neue', 'Segoe UI', Arial, sans-serif;
+  font-size: 11pt;
+  line-height: 1.6;
+  max-width: 210mm;
+  margin: 0 auto;
+  padding: 40px;
+  color: #333;
+  background: white;
+}
+
+h1 { 
+  color: #2c3e50; 
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 10px;
+  font-size: 24pt;
+  margin-top: 30px;
+  font-weight: bold;
+}
+
+h2 { 
+  color: #34495e; 
+  font-size: 18pt;
+  margin-top: 25px;
+  border-bottom: 1px solid #ecf0f1;
+  padding-bottom: 5px;
+  font-weight: bold;
+}
+
+h3 {
+  color: #2c3e50;
+  font-size: 14pt;
+  margin-top: 20px;
+  font-weight: bold;
+}
+
+h4 {
+  color: #34495e;
+  font-size: 12pt;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 10pt;
+  margin: 20px 0;
+  border: 1px solid #ddd;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+code {
+  background-color: #f8f9fa;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-family: 'Courier New', Monaco, monospace;
+  font-size: 10pt;
+}
+
+pre {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+  overflow-x: auto;
+  border-left: 4px solid #3498db;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 20px auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 5px;
+}
+
+strong {
+  color: #e74c3c;
+  font-weight: bold;
+}
+
+em {
+  color: #27ae60;
+  font-style: italic;
+}
+
+ul, ol {
+  margin: 15px 0;
+  padding-left: 25px;
+}
+
+li {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+/* Fix nested lists */
+ul ul, ol ol, ul ol, ol ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+/* Ensure all list items display properly */
+li p {
+  margin: 0;
+  display: inline;
+}
+
+/* Force list items to break properly */
+li {
+  display: list-item;
+}
+
+/* Fix paragraph spacing in lists */
+ul li p, ol li p {
+  margin: 0;
+  padding: 0;
+}
+
+/* Fix numbered list spacing */
+ol li {
+  margin: 10px 0;
+  padding-left: 5px;
+}
+
+/* Ensure bullets are visible */
+ul li {
+  list-style-type: disc;
+  display: list-item;
+  margin-left: 0;
+}
+
+ul li ul li {
+  list-style-type: circle;
+}
+
+ul li ul li ul li {
+  list-style-type: square;
+}
+
+blockquote {
+  border-left: 4px solid #3498db;
+  margin: 20px 0;
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  font-style: italic;
+}
+
+.toc {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 5px;
+  margin: 20px 0;
+  border: 1px solid #ddd;
+}
+
+.toc h2 {
+  margin-top: 0;
+  color: #2c3e50;
+  font-size: 16pt;
+}
+
+hr {
+  border: none;
+  border-top: 2px solid #3498db;
+  margin: 30px 0;
+}
+
+@media print {
+  body {
+    margin: 0;
+    padding: 20px;
+    font-size: 10pt;
+  }
+  
+  h1 {
+    page-break-before: always;
+    font-size: 20pt;
+  }
+  
+  h2 {
+    font-size: 16pt;
+    page-break-before: avoid;
+  }
+  
+  table {
+    page-break-inside: avoid;
+  }
+  
+  img {
+    page-break-inside: avoid;
+  }
+}
