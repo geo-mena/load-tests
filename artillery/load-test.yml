@@ -6,7 +6,7 @@ config:
       - "tokenImage"
   processor: "./log-responses.js"
   http:
-    timeout: 3  # 3 segundo timeout para terminar rápido
+    timeout: 3  # 3s timeout
   plugins:
     metrics-by-endpoint:
       useOnlyRequestNames: true
