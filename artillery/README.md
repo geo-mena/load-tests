@@ -1,5 +1,15 @@
 # Artillery Load Tests
 
+## Tabla de Contenido
+
+- [Instalación](#instalación)
+- [Uso](#uso)
+- [Configuración](#configuración)
+- [Requisitos](#requisitos)
+- [Monitoreo](#monitoreo)
+  - [NetData con Docker Compose](#netdata-con-docker-compose)
+  - [Exportar Datos de NetData](#exportar-datos-de-netdata)
+
 ## Instalación
 
 ```bash
@@ -78,3 +88,42 @@ Durante los load tests, observar:
 - **Red**: I/O de red, conexiones
 - **Disco**: I/O de disco
 - **Procesos**: Aplicaciones en ejecución
+
+### Exportar Datos de NetData
+
+NetData permite exportar y descargar datos históricos de varias formas:
+
+#### 1. Exportar datos via API
+
+```bash
+# Exportar datos de los últimos 5 minutos
+curl "http://localhost:19999/api/v1/data?chart=system.cpu&after=-300" > cpu_data.json
+
+# Exportar métricas de memoria
+curl "http://localhost:19999/api/v1/data?chart=system.ram&after=-300" > memory_data.json
+```
+
+#### 2. Exportar en formato CSV
+
+```bash
+curl "http://localhost:19999/api/v1/data?chart=system.cpu&format=csv&after=-300" > cpu_data.csv
+```
+
+#### 3. Desde la interfaz web
+
+- Ve a `http://localhost:19999`
+- Selecciona el gráfico que quieres
+- Click derecho → "Save image" o usa el botón de export
+- Puedes ajustar el rango temporal (últimos 5 min, 10 min, etc.)
+
+#### 4. Configurar retención de datos
+
+En el docker-compose, los datos se guardan en volúmenes persistentes:
+- `netdatalib:/var/lib/netdata` - Datos históricos
+- `netdatacache:/var/cache/netdata` - Cache
+
+#### Parámetros útiles para la API
+
+- `after=-300` = últimos 5 minutos
+- `after=-600` = últimos 10 minutos  
+- `format=csv` o `format=json`
