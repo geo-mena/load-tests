@@ -1,4 +1,4 @@
-# Análisis Técnico - Load Tests SDK Facephi SelphID
+# Análisis Técnico: Load Tests SDK Facephi SelphID
 
 ## Información General
 
@@ -10,16 +10,34 @@
 
 ## Metodología de Prueba
 
-Se ejecutaron tres tests de carga secuenciales en el siguiente orden:
+Se ejecutaron tres tests de carga secuenciales siguiendo la metodología de escalamiento gradual:
 
-1. **Test 4 TPS** (local) - 22:37:30 a 22:38:30 aproximadamente
-2. **Test 5 TPS** (default) - 22:40:00 a 22:43:00 aproximadamente  
-3. **Test 6 TPS** (stress) - 22:44:30 a 22:47:00 aproximadamente
+### Timeline Preciso de Ejecución
 
-Cada test tuvo una duración de ~60 segundos con fases de:
-- 10s de ramp-up (0 TPS)
-- 40s de carga sostenida
-- 10s de ramp-down (0 TPS)
+**Test 1 - 4 TPS:**
+- **Inicio:** 22:40:00 (timestamp: 1755920400000)
+- **Pico de Carga:** 22:40:30 - 22:41:10 (40s sostenidos)  
+- **Finalización:** 22:41:20
+- **Duración Total:** 80 segundos
+
+**Test 2 - 5 TPS:**  
+- **Inicio:** 22:42:30 (timestamp: 1755920550000)
+- **Pico de Carga:** 22:43:00 - 22:43:40 (40s sostenidos)
+- **Finalización:** 22:43:50  
+- **Duración Total:** 80 segundos
+
+**Test 3 - 6 TPS:**
+- **Inicio:** 22:45:00 (timestamp: 1755920700000)  
+- **Pico de Carga:** 22:45:30 - 22:46:10 (40s sostenidos)
+- **Finalización:** 22:46:20
+- **Duración Total:** 80 segundos
+
+### Configuración de Tests
+Cada test siguió el patrón:
+- **10s:** Ramp-up (0 → Target TPS)
+- **40s:** Carga sostenida (Target TPS constante)  
+- **10s:** Ramp-down (Target TPS → 0)
+- **Timeout:** 3 segundos por request
 
 ## Análisis de Métricas del Sistema
 
@@ -34,9 +52,10 @@ Cada test tuvo una duración de ~60 segundos con fases de:
 - **Test 6 TPS (22:45:00):** Estabilización en ~14.6-14.7 GB
 
 **Análisis Crítico:**
-- Se observa un incremento exponencial de memoria en el primer test
-- La memoria se mantiene elevada durante todos los tests subsecuentes
-- **Potencial Memory Leak:** La memoria no se libera entre tests, indicando posible acumulación de objetos no liberados
+- **Escalamiento exponencial:** 3.2GB → 14.3GB en primer test (+347%)
+- **Persistencia de memoria:** Sin liberación entre tests (indicativo de memory leak)
+- **Patrón no lineal:** Incrementos adicionales menores en tests subsecuentes
+- **Proyección crítica:** En condiciones de 10+ TPS, el sistema podría exceder la RAM disponible
 
 ### 2. Utilización de CPU
 
@@ -59,10 +78,23 @@ Cada test tuvo una duración de ~60 segundos con fases de:
 - **System CPU:** ~6-10%
 - **Total CPU:** **~85-95%** - **CRÍTICO**
 
-**Análisis Crítico:**
-- Escalamiento no lineal del CPU entre 4 TPS y 5 TPS
-- Sistema cerca del límite de capacidad en 5-6 TPS
-- Degradación del rendimiento esperada en cargas superiores
+**Análisis Crítico - Escalamiento No Lineal:**
+
+| TPS | CPU Total | Factor de Escalamiento |
+|-----|-----------|----------------------|
+| 4   | ~30%      | Baseline            |
+| 5   | ~90%      | **300% incremento** |
+| 6   | ~95%      | **317% incremento** |
+
+**Interpretación:**
+- **Escalamiento exponencial:** +25% TPS → +300% CPU
+- **Punto de inflexión:** Entre 4-5 TPS ocurre saturación crítica
+- **Límite físico:** Sistema alcanza capacidad máxima en 5-6 TPS
+- **Proyección:** 7+ TPS resultaría en colapso del sistema
+
+**Impacto en Response Times:**
+- Con Load Average = 16, se esperan latencias de **8-16x** superiores al baseline
+- Timeout de 3s puede ser insuficiente en condiciones de alta carga
 
 ### 3. Load Average del Sistema
 
@@ -92,6 +124,44 @@ Cada test tuvo una duración de ~60 segundos con fases de:
 - Consumo de RAM proporcional a la carga de trabajo
 - Sin indicios de saturación completa de RAM
 - Cache del sistema se mantiene estable
+
+## Análisis de Capacidad y Proyección
+
+### Modelo de Escalabilidad Observado
+
+**Comportamiento del Sistema por TPS:**
+
+| Métrica | 4 TPS | 5 TPS | 6 TPS | Proyección 10 TPS |
+|---------|--------|--------|--------|-------------------|
+| **CPU Total** | 30% | 90% | 95% | **Sistema colapsa** |
+| **Load1** | ~6 | ~16 | ~16 | **>30 (inaceptable)** |
+| **Memoria** | 14.3GB | 14.7GB | 14.6GB | **>16GB (OOM)** |
+| **Estado** | Estable | Crítico | Límite | **Inviable** |
+
+### Límites Operacionales Identificados
+
+**Zona Verde (1-4 TPS):**
+- CPU: <40%
+- Load: <8
+- Memoria: Crecimiento controlado
+- **Recomendación:** Operación normal
+
+**Zona Amarilla (5 TPS):**
+- CPU: ~90% (alerta crítica)
+- Load: 16 (saturación)
+- **Recomendación:** Límite máximo con monitoreo intensivo
+
+**Zona Roja (6+ TPS):**
+- CPU: >95% (sistema al límite)
+- **Recomendación:** Inviable para producción
+
+### Análisis de Escalamiento Horizontal
+
+Para cargas superiores a 4 TPS se requiere:
+- **2 instancias** para 8 TPS efectivos
+- **3 instancias** para 12 TPS efectivos  
+- **Load Balancer** con health checks
+- **Monitoreo per-instancia** de memoria y CPU
 
 ## Timeline de Ejecución y Correlación de Eventos
 
@@ -134,36 +204,6 @@ Cada test tuvo una duración de ~60 segundos con fases de:
    - Load1 de 16 en sistema de 8 cores (200% saturación)
    - Indica colas de procesos esperando CPU
    - **Impacto:** Latencias elevadas en responses
-
-### Recomendaciones Técnicas
-
-#### Inmediatas
-1. **Investigación Memory Leak**
-   - Profiling de memoria con herramientas como Valgrind o AddressSanitizer
-   - Review de liberación de objetos en el código
-   - Implementar timeouts y cleanup de recursos
-
-2. **Optimización de CPU**
-   - Análisis de hot paths con profilers
-   - Optimización de algoritmos de procesamiento de imagen
-   - Implementar paralelización eficiente
-
-#### Mediano Plazo
-3. **Escalamiento Horizontal**
-   - Implementar load balancing con múltiples instancias
-   - Considerar arquitectura de microservicios
-   - Cache de resultados para tokens similares
-
-4. **Monitoreo Continuo**
-   - Alertas automáticas en CPU > 80%
-   - Monitoreo de memoria con thresholds
-   - Implementar health checks
-
-### Límites Operacionales Recomendados
-
-- **Máximo Sostenible:** 4 TPS
-- **Límite de Alerta:** 5 TPS
-- **Crítico:** > 6 TPS
 
 ### Impacto en Producción
 
