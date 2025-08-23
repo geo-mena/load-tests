@@ -39,6 +39,10 @@ Cada test siguió el patrón:
 - **10s:** Ramp-down (Target TPS → 0)
 - **Timeout:** 3 segundos por request
 
+### Timeline Visual de Ejecución
+
+![Load Test Timeline](data/gant.svg)
+
 ## Análisis de Métricas del Sistema
 
 ### 1. Memoria Comprometida (Committed Memory)
