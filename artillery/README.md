@@ -1,5 +1,7 @@
 # Artillery Load Tests
 
+Este directorio contiene pruebas de carga para el SDK Facephi SelphID utilizando Artillery. Los tests están diseñados para evaluar el rendimiento del endpoint de Passive Liveness bajo diferentes cargas de trabajo, permitiendo identificar límites de capacidad y comportamiento del sistema en condiciones de estrés.
+
 ## Tabla de Contenido
 
 - [Instalación](#instalación)
