@@ -82,17 +82,32 @@ pre {
 }
 
 img {
-  max-width: 100%;
+  width: 100% !important;
+  max-width: 100% !important;
   height: auto;
   display: block;
-  margin: 20px auto;
+  margin: 20px 0 !important;
   border: 1px solid #ddd;
   border-radius: 4px;
   padding: 5px;
+  box-sizing: border-box;
+}
+
+figure {
+  width: 100% !important;
+  margin: 20px 0 !important;
+  text-align: left !important;
+}
+
+figure img {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  display: block !important;
 }
 
 strong {
-  color: #e74c3c;
+  color: #2c3e50;
   font-weight: bold;
 }
 

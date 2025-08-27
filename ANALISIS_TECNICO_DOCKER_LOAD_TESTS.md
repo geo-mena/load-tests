@@ -75,20 +75,11 @@ Cada test mantuvo el patrón original:
 
 **Hallazgos por Test:**
 
-**Test 4 TPS:**
-- **User CPU:** Picos de ~10-15%
-- **System CPU:** ~5-6%
-- **Total CPU:** ~20-25%
-
-**Test 5 TPS:**
-- **User CPU:** Incremento a ~65-75%
-- **System CPU:** ~6-8%
-- **Total CPU:** **~75-80%**
-
-**Test 6 TPS:**
-- **User CPU:** Consistente ~70-80%
-- **System CPU:** ~6-8%
-- **Total CPU:** **~80-85%**
+| Test | User CPU | System CPU | Total CPU | Observaciones |
+|------|----------|------------|-----------|---------------|
+| **4 TPS** | Picos de ~10-15% | ~5-6% | ~20-25% | Moderado |
+| **5 TPS** | Incremento a ~65-75% | ~6-8% | **~75-80%** | Alto |
+| **6 TPS** | Consistente ~70-80% | ~6-8% | **~80-85%** | Crítico |
 
 **Análisis Comparativo vs SDK Instalación Manual v6.14.0:**
 
@@ -160,20 +151,11 @@ Cada test mantuvo el patrón original:
 
 **Hallazgos por Test:**
 
-**Test 4 TPS:**
-- **User CPU:** Picos de ~10-15%
-- **System CPU:** ~6-8%
-- **Total CPU:** ~20-25%
-
-**Test 5 TPS:**
-- **User CPU:** Incremento a ~70-80%
-- **System CPU:** ~6-10%
-- **Total CPU:** **~80-85%**
-
-**Test 6 TPS:**
-- **User CPU:** Consistente ~70-80%
-- **System CPU:** ~8-10%
-- **Total CPU:** **~80-90%**
+| Test | User CPU | System CPU | Total CPU | Observaciones |
+|------|----------|------------|-----------|---------------|
+| **4 TPS** | Picos de ~10-15% | ~6-8% | ~20-25% | Moderado |
+| **5 TPS** | Incremento a ~70-80% | ~6-10% | **~80-85%** | Alto |
+| **6 TPS** | Consistente ~70-80% | ~8-10% | **~80-90%** | Crítico |
 
 **Análisis Evolutivo:**
 
