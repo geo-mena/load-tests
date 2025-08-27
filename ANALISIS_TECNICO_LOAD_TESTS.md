@@ -47,7 +47,7 @@ Cada test siguió el patrón:
 
 ### 1. Memoria Comprometida (Committed Memory)
 
-![Committed Memory](netdata/activity/mem_committed.png)
+![Committed Memory](netdata/sdk-6.14.0/activity/mem_committed.png)
 
 **Hallazgos:**
 - **Baseline:** ~3.2 GB de memoria comprometida en estado de reposo
@@ -63,7 +63,7 @@ Cada test siguió el patrón:
 
 ### 2. Utilización de CPU
 
-![CPU Utilization](netdata/compute/system_cpu.png)
+![CPU Utilization](netdata/sdk-6.14.0/compute/system_cpu.png)
 
 **Hallazgos por Test:**
 
@@ -102,7 +102,7 @@ Cada test siguió el patrón:
 
 ### 3. Load Average del Sistema
 
-![System Load](netdata/compute/system_load.png)
+![System Load](netdata/sdk-6.14.0/compute/system_load.png)
 
 **Hallazgos:**
 - **Load1 (1 minuto):** Incremento de 0.5 a ~16 hilos
@@ -116,7 +116,7 @@ Cada test siguió el patrón:
 
 ### 4. Memoria RAM del Sistema
 
-![System RAM](netdata/memory/system_ram.png)
+![System RAM](netdata/sdk-6.14.0/memory/system_ram.png)
 
 **Hallazgos:**
 - **Memoria Libre (Verde):** Disminución significativa durante tests
