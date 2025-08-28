@@ -48,7 +48,7 @@ Cada test mantuvo el patrón original:
 
 ### 1. Memoria Comprometida (Committed Memory)
 
-![Committed Memory - Docker](netdata/sdk-image-docker-6.14.0/activity/mem_committed.png)
+![Committed Memory - Docker](../data/sdk-image-docker-6.14.0/activity/mem_committed.png)
 
 **Hallazgos:**
 - **Baseline:** ~3.3 GB de memoria comprometida en estado de reposo
@@ -71,7 +71,7 @@ Cada test mantuvo el patrón original:
 
 ### 2. Utilización de CPU
 
-![CPU Utilization - Docker](netdata/sdk-image-docker-6.14.0/compute/system_cpu.png)
+![CPU Utilization - Docker](../data/sdk-image-docker-6.14.0/compute/system_cpu.png)
 
 **Hallazgos por Test:**
 
@@ -96,7 +96,7 @@ Cada test mantuvo el patrón original:
 
 ### 3. Load Average del Sistema
 
-![System Load - Docker](netdata/sdk-image-docker-6.14.0/compute/system_load.png)
+![System Load - Docker](../data/sdk-image-docker-6.14.0/compute/system_load.png)
 
 **Hallazgos:**
 - **Load1 (1 minuto):** Pico máximo de ~14 hilos
@@ -113,7 +113,7 @@ Cada test mantuvo el patrón original:
 
 ### 4. Memoria RAM del Sistema
 
-![System RAM - Docker](netdata/sdk-image-docker-6.14.0/memory/system_ram.png)
+![System RAM - Docker](../data/sdk-image-docker-6.14.0/memory/system_ram.png)
 
 **Hallazgos:**
 - **Consumo pico:** ~7 GB durante pruebas de alta carga
@@ -124,7 +124,7 @@ Cada test mantuvo el patrón original:
 
 #### 1. Memoria Comprometida (Committed Memory)
 
-![Committed Memory - RC 6.14.9](netdata/sdk-image-docker-rc-6.14.9/activity/mem_committed.png)
+![Committed Memory - RC 6.14.9](../data/sdk-image-docker-rc-6.14.9/activity/mem_committed.png)
 
 **Hallazgos:**
 - **Baseline:** ~3.3 GB de memoria comprometida en estado de reposo
@@ -147,7 +147,7 @@ Cada test mantuvo el patrón original:
 
 #### 2. Utilización de CPU
 
-![CPU Utilization - RC 6.14.9](netdata/sdk-image-docker-rc-6.14.9/compute/system_cpu.png)
+![CPU Utilization - RC 6.14.9](../data/sdk-image-docker-rc-6.14.9/compute/system_cpu.png)
 
 **Hallazgos por Test:**
 
@@ -172,7 +172,7 @@ Cada test mantuvo el patrón original:
 
 #### 3. Load Average del Sistema
 
-![System Load - RC 6.14.9](netdata/sdk-image-docker-rc-6.14.9/compute/system_load.png)
+![System Load - RC 6.14.9](../data/sdk-image-docker-rc-6.14.9/compute/system_load.png)
 
 **Hallazgos:**
 - **Load1 (1 minuto):** Pico máximo de ~13 hilos
@@ -189,7 +189,7 @@ Cada test mantuvo el patrón original:
 
 #### 4. Memoria RAM del Sistema
 
-![System RAM - RC 6.14.9](netdata/sdk-image-docker-rc-6.14.9/memory/system_ram.png)
+![System RAM - RC 6.14.9](../data/sdk-image-docker-rc-6.14.9/memory/system_ram.png)
 
 **Hallazgos:**
 - **Consumo pico:** ~6.5 GB durante pruebas de alta carga
