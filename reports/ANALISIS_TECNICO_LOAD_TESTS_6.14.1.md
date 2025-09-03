@@ -11,7 +11,7 @@
 
 ## Metodología de Prueba
 
-Se ejecutaron tres tests de carga secuenciales siguiendo la metodología de escalamiento gradual establecida:
+Se ejecutaron tres tests de carga secuenciales siguiendo la metodología de escalamiento gradual:
 
 ### Timeline Preciso de Ejecución
 
@@ -22,7 +22,7 @@ Se ejecutaron tres tests de carga secuenciales siguiendo la metodología de esca
 | **3** | 6 TPS | 23:45:00 | 23:45:30 - 23:46:10 (40s) | 23:46:20 | 80s |
 
 ### Configuración de Tests
-Cada test siguió el patrón estándar:
+
 - **10s:** Ramp-up (0 → Target TPS)
 - **40s:** Carga sostenida (Target TPS constante)  
 - **10s:** Ramp-down (Target TPS → 0)
