@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SDK Facephi SelphID Load Test RC v6.14.1</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">SDK Facephi SelphID Load Test RC v6.14.1</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#información-general" id="toc-información-general">Información General</a></li>
+<li><a href="#metodología-de-prueba" id="toc-metodología-de-prueba">Metodología de Prueba</a>
+<ul>
+<li><a href="#timeline-preciso-de-ejecución" id="toc-timeline-preciso-de-ejecución">Timeline Preciso de Ejecución</a></li>
+<li><a href="#configuración-de-tests" id="toc-configuración-de-tests">Configuración de Tests</a></li>
+</ul></li>
+<li><a href="#análisis-de-métricas-del-sistema" id="toc-análisis-de-métricas-del-sistema">Análisis de Métricas del Sistema</a>
+<ul>
+<li><a href="#memoria-comprometida-committed-memory" id="toc-memoria-comprometida-committed-memory">1. Memoria Comprometida (Committed Memory)</a></li>
+<li><a href="#utilización-de-cpu" id="toc-utilización-de-cpu">2. Utilización de CPU</a></li>
+<li><a href="#load-average-del-sistema" id="toc-load-average-del-sistema">3. Load Average del Sistema</a></li>
+<li><a href="#memoria-ram-del-sistema" id="toc-memoria-ram-del-sistema">4. Memoria RAM del Sistema</a></li>
+</ul></li>
+<li><a href="#análisis-comparativo-evolutivo" id="toc-análisis-comparativo-evolutivo">Análisis Comparativo Evolutivo: v6.14.0 vs RC v6.14.1</a></li>
+<li><a href="#timeline-de-ejecución-y-correlación-de-eventos" id="toc-timeline-de-ejecución-y-correlación-de-eventos">Timeline de Ejecución y Correlación de Eventos</a></li>
+<li><a href="#conclusiones-y-recomendaciones" id="toc-conclusiones-y-recomendaciones">Conclusiones y Recomendaciones</a></li>
+</ul>
+</nav>
+
+<h2 id="información-general">Información General</h2>
+<p><strong>Fecha de Ejecución:</strong> 2 de Septiembre, 2025<br />
+<strong>SDK Evaluado:</strong> Facephi SelphID Instalación Manual RC v6.14.1<br />
+<strong>Endpoint Analizado:</strong> <code>/api/v1/selphid/passive-liveness/evaluate/token</code><br />
+<strong>Herramienta de Load Testing:</strong> Artillery<br />
+<strong>Herramienta de Monitoreo:</strong> NetData<br />
+<strong>Comparación Evolutiva:</strong> Instalación Manual v6.14.0 vs Instalación Manual RC v6.14.1</p>
+
+<h2 id="metodología-de-prueba">Metodología de Prueba</h2>
+<p>Se ejecutaron tres tests de carga secuenciales siguiendo la metodología de escalamiento gradual:</p>
+
+<h3 id="timeline-preciso-de-ejecución">Timeline Preciso de Ejecución</h3>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 9%" />
+<col style="width: 12%" />
+<col style="width: 21%" />
+<col style="width: 15%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test</th>
+<th>TPS</th>
+<th>Inicio</th>
+<th>Pico de Carga</th>
+<th>Finalización</th>
+<th>Duración</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>4 TPS</td>
+<td>23:40:00</td>
+<td>23:40:30 - 23:41:10 (40s)</td>
+<td>23:41:20</td>
+<td>80s</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>5 TPS</td>
+<td>23:42:30</td>
+<td>23:43:00 - 23:43:40 (40s)</td>
+<td>23:43:50</td>
+<td>80s</td>
+</tr>
+<tr class="odd">
+<td><strong>3</strong></td>
+<td>6 TPS</td>
+<td>23:45:00</td>
+<td>23:45:30 - 23:46:10 (40s)</td>
+<td>23:46:20</td>
+<td>80s</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="configuración-de-tests">Configuración de Tests</h3>
+<ul>
+<li><strong>10s:</strong> Ramp-up (0 → Target TPS)</li>
+<li><strong>40s:</strong> Carga sostenida (Target TPS constante)</li>
+<li><strong>10s:</strong> Ramp-down (Target TPS → 0)</li>
+<li><strong>Timeout:</strong> 3 segundos por request</li>
+</ul>
+
+<h2 id="análisis-de-métricas-del-sistema">Análisis de Métricas del Sistema</h2>
+
+<h3 id="memoria-comprometida-committed-memory">1. Memoria Comprometida (Committed Memory)</h3>
+<figure>
+<img src="../data/sdk-6.14.1/activity/mem_committed.png" alt="Committed Memory" />
+<figcaption aria-hidden="true">Committed Memory</figcaption>
+</figure>
+
+<p><strong>Hallazgos:</strong></p>
+<ul>
+<li><strong>Baseline:</strong> ~3.2 GB de memoria comprometida en estado de reposo</li>
+<li><strong>Test 4 TPS (23:40:00):</strong> Incremento gradual a ~13.8 GB (+331% aumento)</li>
+<li><strong>Test 5 TPS (23:42:30):</strong> Pico máximo de ~14.2 GB (+344% aumento)</li>
+<li><strong>Test 6 TPS (23:45:00):</strong> Estabilización en ~14.1 GB</li>
+</ul>
+
+<p><strong>Análisis Comparativo vs SDK Instalación Manual v6.14.0:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 31%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Métrica</th>
+<th>SDK v6.14.0</th>
+<th>SDK RC v6.14.1</th>
+<th>Evolución</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Memoria Base</strong></td>
+<td>3.2 GB</td>
+<td>3.2 GB</td>
+<td><strong>Estable</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Memoria Pico</strong></td>
+<td>14.7 GB</td>
+<td>14.2 GB</td>
+<td><strong>-3.4% (-500MB)</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Escalamiento</strong></td>
+<td>+359%</td>
+<td>+344%</td>
+<td><strong>-4% menos escalamiento</strong></td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Interpretación:</strong></p>
+<ul>
+<li><strong>Leve optimización:</strong> RC v6.14.1 consume 500MB menos memoria pico</li>
+<li><strong>Memory leak persistente:</strong> Sin mejora significativa en liberación de memoria entre tests</li>
+<li><strong>Comportamiento similar:</strong> Patrón de escalamiento casi idéntico a v6.14.0</li>
+<li><strong>Oportunidad de mejora:</strong> Persiste el problema de memory leak identificado</li>
+</ul>
+
+<h3 id="utilización-de-cpu">2. Utilización de CPU</h3>
+<figure>
+<img src="../data/sdk-6.14.1/compute/system_cpu.png" alt="CPU Utilization" />
+<figcaption aria-hidden="true">CPU Utilization</figcaption>
+</figure>
+
+<p><strong>Hallazgos por Test:</strong></p>
+
+<p><strong>Test 4 TPS:</strong></p>
+<ul>
+<li><strong>User CPU:</strong> Picos de ~20-25%</li>
+<li><strong>System CPU:</strong> Picos de ~6-8%</li>
+<li><strong>Total CPU:</strong> ~30-35% durante carga sostenida</li>
+</ul>
+
+<p><strong>Test 5 TPS:</strong></p>
+<ul>
+<li><strong>User CPU:</strong> Incremento significativo a ~75-85%</li>
+<li><strong>System CPU:</strong> ~8-10% consistente</li>
+<li><strong>Total CPU:</strong> <strong>~85-90%</strong> - <strong>CRÍTICO</strong></li>
+</ul>
+
+<p><strong>Test 6 TPS:</strong></p>
+<ul>
+<li><strong>User CPU:</strong> Similar al test 5 TPS (~75-85%)</li>
+<li><strong>System CPU:</strong> ~8-10%</li>
+<li><strong>Total CPU:</strong> <strong>~85-95%</strong> - <strong>CRÍTICO</strong></li>
+</ul>
+
+<p><strong>Análisis Comparativo Evolutivo:</strong></p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 31%" />
+<col style="width: 34%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>TPS</th>
+<th>SDK v6.14.0 CPU</th>
+<th>SDK RC v6.14.1 CPU</th>
+<th>Evolución</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4</td>
+<td>~30%</td>
+<td>~35%</td>
+<td><strong>+17% mayor uso</strong></td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>~90%</td>
+<td>~90%</td>
+<td><strong>Estable</strong></td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>~95%</td>
+<td>~95%</td>
+<td><strong>Estable</strong></td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Interpretación:</strong></p>
+<ul>
+<li><strong>Regresión menor en cargas bajas:</strong> +17% más CPU en 4 TPS</li>
+<li><strong>Comportamiento estable en cargas altas:</strong> Sin cambios significativos en 5-6 TPS</li>
+<li><strong>Escalamiento no lineal persistente:</strong> Mantiene el patrón exponencial de v6.14.0</li>
+<li><strong>Límite operacional:</strong> Se mantiene en ~4-5 TPS para operación sostenible</li>
+</ul>
+
+<h3 id="load-average-del-sistema">3. Load Average del Sistema</h3>
+<figure>
+<img src="../data/sdk-6.14.1/compute/system_load.png" alt="System Load" />
+<figcaption aria-hidden="true">System Load</figcaption>
+</figure>
+
+<p><strong>Hallazgos:</strong></p>
+<ul>
+<li><strong>Load1 (1 minuto):</strong> Incremento de 0.5 a ~15-16 hilos</li>
+<li><strong>Load5 (5 minutos):</strong> Crecimiento progresivo a ~7-8 hilos</li>
+<li><strong>Load15 (15 minutos):</strong> Estable en ~4-5 hilos</li>
+</ul>
+
+<p><strong>Análisis Comparativo:</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 31%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Métrica</th>
+<th>SDK v6.14.0</th>
+<th>SDK RC v6.14.1</th>
+<th>Evolución</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Load1 Máximo</strong></td>
+<td>16 hilos</td>
+<td>15-16 hilos</td>
+<td><strong>Estable</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Load5 Máximo</strong></td>
+<td>7 hilos</td>
+<td>7-8 hilos</td>
+<td><strong>+14% mayor</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Saturación</strong></td>
+<td>200% (16/8)</td>
+<td>200% (16/8)</td>
+<td><strong>Sin cambios</strong></td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Interpretación:</strong></p>
+<ul>
+<li><strong>Saturación similar:</strong> Mantiene el nivel crítico de Load Average</li>
+<li><strong>Leve incremento en Load5:</strong> Indica impacto ligeramente más sostenido</li>
+<li><strong>Sistema al límite:</strong> Confirma la saturación del sistema de 8 cores</li>
+</ul>
+
+<h3 id="memoria-ram-del-sistema">4. Memoria RAM del Sistema</h3>
+<figure>
+<img src="../data/sdk-6.14.1/memory/system_ram.png" alt="System RAM" />
+<figcaption aria-hidden="true">System RAM</figcaption>
+</figure>
+
+<p><strong>Hallazgos:</strong></p>
+<ul>
+<li><strong>Memoria Libre (Verde):</strong> Disminución significativa durante tests</li>
+<li><strong>Memoria Usada (Azul):</strong> Incremento proporcional a la carga</li>
+<li><strong>Cache/Buffers (Naranja):</strong> Impacto mínimo</li>
+<li><strong>Total RAM:</strong> ~8 GB del sistema</li>
+</ul>
+
+<p><strong>Análisis:</strong></p>
+<ul>
+<li><strong>Consumo estable:</strong> Comportamiento similar a v6.14.0</li>
+<li><strong>Sin saturación crítica:</strong> Memoria RAM no es el cuello de botella</li>
+<li><strong>Cache del sistema:</strong> Se mantiene estable durante las pruebas</li>
+</ul>
+
+<h2 id="análisis-comparativo-evolutivo">Análisis Comparativo Evolutivo: v6.14.0 vs RC v6.14.1</h2>
+
+<h3 id="modelo-de-escalabilidad-comparado">Modelo de Escalabilidad Comparado</h3>
+
+<p><strong>Comportamiento del Sistema por TPS:</strong></p>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 25%" />
+<col style="width: 31%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Métrica</th>
+<th>SDK v6.14.0</th>
+<th>SDK RC v6.14.1</th>
+<th>Tendencia</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>CPU Total (4/5/6 TPS)</strong></td>
+<td>30%/90%/95%</td>
+<td>35%/90%/95%</td>
+<td><strong>Leve regresión</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Load1 Máximo</strong></td>
+<td>16 hilos</td>
+<td>15-16 hilos</td>
+<td><strong>Estable</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Memoria Pico</strong></td>
+<td>14.7 GB</td>
+<td>14.2 GB</td>
+<td><strong>Leve mejora</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Escalamiento Mem</strong></td>
+<td>+359%</td>
+<td>+344%</td>
+<td><strong>Leve mejora</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Estado General</strong></td>
+<td>Crítico</td>
+<td>Crítico</td>
+<td><strong>Sin mejora</strong></td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="límites-operacionales-comparados">Límites Operacionales Comparados</h3>
+
+<p><strong>Zona Verde (1-4 TPS):</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Versión</th>
+<th>CPU</th>
+<th>Load</th>
+<th>Memoria</th>
+<th>Recomendación</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>SDK v6.14.0</strong></td>
+<td>&lt;40%</td>
+<td>&lt;8</td>
+<td>Crecimiento controlado</td>
+<td>Operación normal</td>
+</tr>
+<tr class="even">
+<td><strong>SDK RC v6.14.1</strong></td>
+<td>&lt;45%</td>
+<td>&lt;8</td>
+<td>Crecimiento controlado</td>
+<td>Operación normal con monitoreo</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Zona Amarilla (5 TPS):</strong></p>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 12%" />
+<col style="width: 12%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Versión</th>
+<th>CPU</th>
+<th>Load</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>SDK v6.14.0</strong></td>
+<td>~90%</td>
+<td>16</td>
+<td>Límite máximo crítico</td>
+</tr>
+<tr class="even">
+<td><strong>SDK RC v6.14.1</strong></td>
+<td>~90%</td>
+<td>15-16</td>
+<td>Límite máximo crítico</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>Zona Roja (6+ TPS):</strong></p>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 12%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Versión</th>
+<th>CPU</th>
+<th>Estado</th>
+<th>Viabilidad</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>SDK v6.14.0</strong></td>
+<td>&gt;95%</td>
+<td>Sistema al límite</td>
+<td>Inviable</td>
+</tr>
+<tr class="even">
+<td><strong>SDK RC v6.14.1</strong></td>
+<td>&gt;95%</td>
+<td>Sistema al límite</td>
+<td>Inviable</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="escalamiento-horizontal---proyecciones">Escalamiento Horizontal - Proyecciones</h3>
+
+<p><strong>Para cargas superiores a 4 TPS:</strong></p>
+<ul>
+<li><strong>2 instancias</strong> para 8 TPS efectivos</li>
+<li><strong>3 instancias</strong> para 12 TPS efectivos</li>
+<li><strong>Load Balancer</strong> con health checks</li>
+<li><strong>Monitoreo per-instancia</strong> crítico</li>
+</ul>
+
+<h2 id="timeline-de-ejecución-y-correlación-de-eventos">Timeline de Ejecución y Correlación de Eventos</h2>
+
+<h3 id="fase-1-test-4-tps-234000">Fase 1: Test 4 TPS (23:40:00)</h3>
+<ul>
+<li><strong>Duración:</strong> ~1 minuto</li>
+<li><strong>Impacto:</strong> Moderado a Alto</li>
+<li><strong>CPU:</strong> 30-35% (+17% vs v6.14.0)</li>
+<li><strong>Memoria:</strong> Salto de 3.2GB a 13.8GB</li>
+<li><strong>Load1:</strong> Incremento a ~6-8</li>
+</ul>
+
+<h3 id="fase-2-test-5-tps-234230">Fase 2: Test 5 TPS (23:42:30)</h3>
+<ul>
+<li><strong>Duración:</strong> ~1 minuto</li>
+<li><strong>Impacto:</strong> Alto</li>
+<li><strong>CPU:</strong> 85-90% (<strong>Punto crítico mantenido</strong>)</li>
+<li><strong>Memoria:</strong> Pico de 14.2GB (-3.4% vs v6.14.0)</li>
+<li><strong>Load1:</strong> Pico de ~15-16 (<strong>Saturación</strong>)</li>
+</ul>
+
+<h3 id="fase-3-test-6-tps-234500">Fase 3: Test 6 TPS (23:45:00)</h3>
+<ul>
+<li><strong>Duración:</strong> ~1 minuto</li>
+<li><strong>Impacto:</strong> Crítico</li>
+<li><strong>CPU:</strong> 85-95% (<strong>Límite del sistema</strong>)</li>
+<li><strong>Memoria:</strong> Estabilización en 14.1GB</li>
+<li><strong>Load1:</strong> Sostenido en ~15-16</li>
+</ul>
+
+<h2 id="conclusiones-y-recomendaciones">Conclusiones y Recomendaciones</h2>
+
+<h3 id="evaluación-de-la-evolución-v6140--rc-v6141">Evaluación de la Evolución v6.14.0 → RC v6.14.1</h3>
+
+<p><strong>Mejoras Identificadas:</strong></p>
+<ol type="1">
+<li><strong>Optimización Menor de Memoria</strong>
+<ul>
+<li>Reducción de 500MB en consumo pico (-3.4%)</li>
+<li>Escalamiento ligeramente más controlado (-4%)</li>
+</ul></li>
+</ol>
+
+<p><strong>Regresiones Identificadas:</strong></p>
+<ol type="1">
+<li><strong>Incremento en CPU (cargas bajas)</strong>
+<ul>
+<li>+17% más utilización en 4 TPS</li>
+<li>Posible impacto de nuevas funcionalidades</li>
+</ul></li>
+</ol>
+
+<p><strong>Aspectos Sin Cambio:</strong></p>
+<ol type="1">
+<li><strong>Memory Leak Persistente</strong>
+<ul>
+<li>Memoria no se libera entre tests</li>
+<li>Patrón exponencial de crecimiento mantenido</li>
+</ul></li>
+<li><strong>Saturación de CPU</strong>
+<ul>
+<li>Límites críticos en 5-6 TPS sin mejora</li>
+<li>Escalamiento no lineal persistente</li>
+</ul></li>
+<li><strong>Load Average</strong>
+<ul>
+<li>Saturación del sistema mantenida</li>
+</ul></li>
+</ol>
+
+<h3 id="impacto-en-producción">Impacto en Producción</h3>
+
+<p><strong>SLA Recomendado (Sin Cambios):</strong></p>
+<ul>
+<li><strong>&lt; 4 TPS</strong> para mantener performance óptimo</li>
+<li><strong>Escalamiento horizontal</strong> requerido para &gt; 4 TPS</li>
+<li><strong>Monitoreo intensivo</strong> crítico en cualquier carga</li>
+</ul>
+
+<h3 id="recomendaciones-técnicas">Recomendaciones Técnicas</h3>
+
+<ol type="1">
+<li><p><strong>Investigación del Memory Leak</strong></p>
+<ul>
+<li>Implementar profiling de memoria durante desarrollo</li>
+<li>Revisar liberación de recursos en ciclo de vida de requests</li>
+<li>Considerar garbage collection más agresivo</li>
+</ul></li>
+<li><p><strong>Optimización de CPU en Cargas Bajas</strong></p>
+<ul>
+<li>Investigar causa del incremento del 17% en 4 TPS</li>
+<li>Revisar impacto de nuevas funcionalidades en RC v6.14.1</li>
+</ul></li>
+<li><p><strong>Estrategia de Escalamiento</strong></p>
+<ul>
+<li>Mantener arquitectura de múltiples instancias</li>
+<li>Implementar circuit breaker en 4+ TPS</li>
+<li>Monitoreo proactivo de métricas críticas</li>
+</ul></li>
+</ol>
+
+<h3 id="resumen-ejecutivo">Resumen Ejecutivo</h3>
+
+<p><strong>SDK RC v6.14.1</strong> presenta una <strong>evolución mixta</strong> respecto a v6.14.0:</p>
+<ul>
+<li><strong>Ligera mejora</strong> en consumo de memoria pico (-500MB)</li>
+<li><strong>Regresión menor</strong> en CPU para cargas bajas (+17%)</li>
+<li><strong>Sin mejoras significativas</strong> en problemas fundamentales (memory leak, saturación CPU)</li>
+</ul>
+
+<p><strong>Recomendación:</strong> La versión RC v6.14.1 mantiene las <strong>mismas limitaciones operacionales</strong> que v6.14.0, con mejoras marginales que no justifican cambio en estrategias de despliegue o SLA.</p>
+
+</body>
+</html>
