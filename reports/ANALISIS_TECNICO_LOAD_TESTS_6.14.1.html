@@ -125,12 +125,48 @@
 </figure>
 
 <p><strong>Hallazgos:</strong></p>
-<ul>
-<li><strong>Baseline:</strong> ~3.2 GB de memoria comprometida en estado de reposo</li>
-<li><strong>Test 4 TPS (23:40:00):</strong> Incremento gradual a ~13.8 GB (+331% aumento)</li>
-<li><strong>Test 5 TPS (23:42:30):</strong> Pico máximo de ~14.2 GB (+344% aumento)</li>
-<li><strong>Test 6 TPS (23:45:00):</strong> Estabilización en ~14.1 GB</li>
-</ul>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 31%" />
+<col style="width: 25%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test</th>
+<th>Horario</th>
+<th>Memoria Comprometida</th>
+<th>Incremento</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Baseline</strong></td>
+<td>Estado de reposo</td>
+<td>~3.2 GB</td>
+<td>-</td>
+</tr>
+<tr class="even">
+<td><strong>Test 4 TPS</strong></td>
+<td>23:40:00</td>
+<td>~13.8 GB</td>
+<td><strong>+331%</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Test 5 TPS</strong></td>
+<td>23:42:30</td>
+<td>~14.2 GB</td>
+<td><strong>+344% (Pico)</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Test 6 TPS</strong></td>
+<td>23:45:00</td>
+<td>~14.1 GB</td>
+<td><strong>+341%</strong></td>
+</tr>
+</tbody>
+</table>
 
 <p><strong>Análisis Comparativo vs SDK Instalación Manual v6.14.0:</strong></p>
 <table>
@@ -185,27 +221,47 @@
 </figure>
 
 <p><strong>Hallazgos por Test:</strong></p>
-
-<p><strong>Test 4 TPS:</strong></p>
-<ul>
-<li><strong>User CPU:</strong> Picos de ~20-25%</li>
-<li><strong>System CPU:</strong> Picos de ~6-8%</li>
-<li><strong>Total CPU:</strong> ~30-35% durante carga sostenida</li>
-</ul>
-
-<p><strong>Test 5 TPS:</strong></p>
-<ul>
-<li><strong>User CPU:</strong> Incremento significativo a ~75-85%</li>
-<li><strong>System CPU:</strong> ~8-10% consistente</li>
-<li><strong>Total CPU:</strong> <strong>~85-90%</strong> - <strong>CRÍTICO</strong></li>
-</ul>
-
-<p><strong>Test 6 TPS:</strong></p>
-<ul>
-<li><strong>User CPU:</strong> Similar al test 5 TPS (~75-85%)</li>
-<li><strong>System CPU:</strong> ~8-10%</li>
-<li><strong>Total CPU:</strong> <strong>~85-95%</strong> - <strong>CRÍTICO</strong></li>
-</ul>
+<table>
+<colgroup>
+<col style="width: 18%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Test</th>
+<th>User CPU</th>
+<th>System CPU</th>
+<th>Total CPU</th>
+<th>Estado</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>4 TPS</strong></td>
+<td>Picos de ~20-25%</td>
+<td>Picos de ~6-8%</td>
+<td>~30-35%</td>
+<td>Normal</td>
+</tr>
+<tr class="even">
+<td><strong>5 TPS</strong></td>
+<td>~75-85%</td>
+<td>~8-10%</td>
+<td><strong>~85-90%</strong></td>
+<td><strong>CRÍTICO</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>6 TPS</strong></td>
+<td>~75-85%</td>
+<td>~8-10%</td>
+<td><strong>~85-95%</strong></td>
+<td><strong>CRÍTICO</strong></td>
+</tr>
+</tbody>
+</table>
 
 <p><strong>Análisis Comparativo Evolutivo:</strong></p>
 <table>
@@ -260,11 +316,42 @@
 </figure>
 
 <p><strong>Hallazgos:</strong></p>
-<ul>
-<li><strong>Load1 (1 minuto):</strong> Incremento de 0.5 a ~15-16 hilos</li>
-<li><strong>Load5 (5 minutos):</strong> Crecimiento progresivo a ~7-8 hilos</li>
-<li><strong>Load15 (15 minutos):</strong> Estable en ~4-5 hilos</li>
-</ul>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Métrica</th>
+<th>Período</th>
+<th>Valor Base</th>
+<th>Valor Pico</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Load1</strong></td>
+<td>1 minuto</td>
+<td>0.5</td>
+<td>~15-16 hilos</td>
+</tr>
+<tr class="even">
+<td><strong>Load5</strong></td>
+<td>5 minutos</td>
+<td>-</td>
+<td>~7-8 hilos</td>
+</tr>
+<tr class="odd">
+<td><strong>Load15</strong></td>
+<td>15 minutos</td>
+<td>-</td>
+<td>~4-5 hilos</td>
+</tr>
+</tbody>
+</table>
 
 <p><strong>Análisis Comparativo:</strong></p>
 <table>
@@ -318,12 +405,48 @@
 </figure>
 
 <p><strong>Hallazgos:</strong></p>
-<ul>
-<li><strong>Memoria Libre (Verde):</strong> Disminución significativa durante tests</li>
-<li><strong>Memoria Usada (Azul):</strong> Incremento proporcional a la carga</li>
-<li><strong>Cache/Buffers (Naranja):</strong> Impacto mínimo</li>
-<li><strong>Total RAM:</strong> ~8 GB del sistema</li>
-</ul>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 20%" />
+<col style="width: 30%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tipo de Memoria</th>
+<th>Color</th>
+<th>Comportamiento</th>
+<th>Impacto</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Memoria Libre</strong></td>
+<td>Verde</td>
+<td>Disminución significativa durante tests</td>
+<td>Alto</td>
+</tr>
+<tr class="even">
+<td><strong>Memoria Usada</strong></td>
+<td>Azul</td>
+<td>Incremento proporcional a la carga</td>
+<td>Alto</td>
+</tr>
+<tr class="odd">
+<td><strong>Cache/Buffers</strong></td>
+<td>Naranja</td>
+<td>Impacto mínimo</td>
+<td>Bajo</td>
+</tr>
+<tr class="even">
+<td><strong>Total RAM</strong></td>
+<td>-</td>
+<td>~8 GB del sistema</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
 
 <p><strong>Análisis:</strong></p>
 <ul>
@@ -500,32 +623,89 @@
 
 <h2 id="timeline-de-ejecución-y-correlación-de-eventos">Timeline de Ejecución y Correlación de Eventos</h2>
 
-<h3 id="fase-1-test-4-tps-234000">Fase 1: Test 4 TPS (23:40:00)</h3>
-<ul>
-<li><strong>Duración:</strong> ~1 minuto</li>
-<li><strong>Impacto:</strong> Moderado a Alto</li>
-<li><strong>CPU:</strong> 30-35% (+17% vs v6.14.0)</li>
-<li><strong>Memoria:</strong> Salto de 3.2GB a 13.8GB</li>
-<li><strong>Load1:</strong> Incremento a ~6-8</li>
-</ul>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fase</th>
+<th>TPS</th>
+<th>Horario</th>
+<th>Duración</th>
+<th>CPU</th>
+<th>Memoria</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>4</td>
+<td>23:40:00</td>
+<td>~1 minuto</td>
+<td>30-35% (+17% vs v6.14.0)</td>
+<td>3.2GB → 13.8GB</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td>5</td>
+<td>23:42:30</td>
+<td>~1 minuto</td>
+<td><strong>85-90% (Crítico)</strong></td>
+<td>Pico 14.2GB (-3.4% vs v6.14.0)</td>
+</tr>
+<tr class="odd">
+<td><strong>3</strong></td>
+<td>6</td>
+<td>23:45:00</td>
+<td>~1 minuto</td>
+<td><strong>85-95% (Límite)</strong></td>
+<td>Estabilización 14.1GB</td>
+</tr>
+</tbody>
+</table>
 
-<h3 id="fase-2-test-5-tps-234230">Fase 2: Test 5 TPS (23:42:30)</h3>
-<ul>
-<li><strong>Duración:</strong> ~1 minuto</li>
-<li><strong>Impacto:</strong> Alto</li>
-<li><strong>CPU:</strong> 85-90% (<strong>Punto crítico mantenido</strong>)</li>
-<li><strong>Memoria:</strong> Pico de 14.2GB (-3.4% vs v6.14.0)</li>
-<li><strong>Load1:</strong> Pico de ~15-16 (<strong>Saturación</strong>)</li>
-</ul>
-
-<h3 id="fase-3-test-6-tps-234500">Fase 3: Test 6 TPS (23:45:00)</h3>
-<ul>
-<li><strong>Duración:</strong> ~1 minuto</li>
-<li><strong>Impacto:</strong> Crítico</li>
-<li><strong>CPU:</strong> 85-95% (<strong>Límite del sistema</strong>)</li>
-<li><strong>Memoria:</strong> Estabilización en 14.1GB</li>
-<li><strong>Load1:</strong> Sostenido en ~15-16</li>
-</ul>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 20%" />
+<col style="width: 30%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Fase</th>
+<th>Load1</th>
+<th>Impacto</th>
+<th>Estado del Sistema</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>1</strong></td>
+<td>~6-8</td>
+<td>Moderado a Alto</td>
+<td>Controlado</td>
+</tr>
+<tr class="even">
+<td><strong>2</strong></td>
+<td><strong>~15-16 (Saturación)</strong></td>
+<td>Alto</td>
+<td><strong>Punto crítico mantenido</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>3</strong></td>
+<td><strong>~15-16 (Sostenido)</strong></td>
+<td>Crítico</td>
+<td><strong>Límite del sistema</strong></td>
+</tr>
+</tbody>
+</table>
 
 <h2 id="conclusiones-y-recomendaciones">Conclusiones y Recomendaciones</h2>
 
@@ -598,7 +778,7 @@
 </ul></li>
 </ol>
 
-<h3 id="resumen-ejecutivo">Resumen Ejecutivo</h3>
+<h3 id="resumen-ejecutivo">Resumen</h3>
 
 <p><strong>SDK RC v6.14.1</strong> presenta una <strong>evolución mixta</strong> respecto a v6.14.0:</p>
 <ul>
@@ -606,8 +786,6 @@
 <li><strong>Regresión menor</strong> en CPU para cargas bajas (+17%)</li>
 <li><strong>Sin mejoras significativas</strong> en problemas fundamentales (memory leak, saturación CPU)</li>
 </ul>
-
-<p><strong>Recomendación:</strong> La versión RC v6.14.1 mantiene las <strong>mismas limitaciones operacionales</strong> que v6.14.0, con mejoras marginales que no justifican cambio en estrategias de despliegue o SLA.</p>
 
 </body>
 </html>
